@@ -1,0 +1,6 @@
+pytesseract
+pillow
+torch 
+torchvision 
+torchaudio
+easyocr
