@@ -39,6 +39,7 @@ testImages/
 ```bash
 sudo apt update
 sudo apt install tesseract-ocr
+pip install pytesseract
 ```
 
 **Performance Analysis:**
