@@ -7,3 +7,5 @@ easyocr
 paddlepaddle
 paddleocr
 python-doctr[tensorflow]
+matplotlib
+mplcursors 
