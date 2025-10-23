@@ -1,11 +1,12 @@
-pytesseract
+# pytesseract
 pillow
 torch 
 torchvision 
 torchaudio
-easyocr
-paddlepaddle
-paddleocr
+# easyocr
+# paddlepaddle
+# paddleocr
 python-doctr[tensorflow]
 matplotlib
-mplcursors 
+# mplcursors 
+opencv-python
