@@ -3,7 +3,9 @@ from doctr.models import ocr_predictor, from_hub
 import cv2
 import numpy as np
 import os
-from image_loader import get_images_from_folder  # <-- IMPORT YOUR FUNCTION
+from image_loader import get_images_from_folder
+import time
+
 
 # This gets the directory where your script is located
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,86 +32,99 @@ def ocr_with_doctr(image_path, save_visualized=True, output_dir="output"):
 
     filename = os.path.basename(image_path)
     print(f"Analyzing {filename}...")
-    
+
     try:
-        # --- 2. Load the image and Document ---
-        doc = DocumentFile.from_images(image_path)
-        # Load image with OpenCV for drawing
-        image = cv2.imread(image_path)
-        height, width = image.shape[:2]
 
-        # --- 3. Run the prediction ---
-        print("Running DocTR model...")
-        result = model(doc)
+        with open(SCRIPT_DIR + "/output.txt", "a") as f:
+            # --- 2. Load the image and Document ---
+            doc = DocumentFile.from_images(image_path)
+            # Load image with OpenCV for drawing
+            image = cv2.imread(image_path)
+            height, width = image.shape[:2]
 
-        # --- 4. Process and Display Results ---
-        print(f"\n--- DocTR Output for {filename} ---")
-        
-        if not result.pages:
-            print("  No pages or text found in document.")
-            print("-" * (len(filename) + 21) + "\n")
-            return
+            # --- 3. Run the prediction ---
+            print(f"Running DocTR model on {filename}...")
+            f.write(f"Running DocTR model on {filename}...\n")
+            result = model(doc)
 
-        for page in result.pages:
-            for block in page.blocks:
-                for line in block.lines:
-                    for word in line.words:
-                        # Get word text and confidence
-                        print(f"  Text: {word.value} | Confidence: {word.confidence:.4f}")
+            # --- 4. Process and Display Results ---
+            f.write(f"\n--- DocTR Output for {filename} ---\n")
 
-                        # Only draw boxes if we are saving the image
-                        if save_visualized:
-                            geometry = word.geometry
-                            # Convert normalized coordinates to pixel coordinates
-                            x1 = int(geometry[0][0] * width)
-                            y1 = int(geometry[0][1] * height)
-                            x2 = int(geometry[1][0] * width)
-                            y2 = int(geometry[1][1] * height)
+            if not result.pages:
+                f.write("  No pages or text found in document.\n")
+                f.write("-" * (len(filename) + 21) + "\n")
+                return
 
-                            # Draw rectangle on image
-                            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                            # Add text label
-                            label = f"{word.value} ({word.confidence:.2f})"
-                            cv2.putText(
-                                image, label, (x1, y1 - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1
+            for page in result.pages:
+                for block in page.blocks:
+                    for line in block.lines:
+                        for word in line.words:
+                            # Get word text and confidence
+                            f.write(
+                                f"  Text: {word.value} | Confidence: {word.confidence:.4f}\n"
                             )
 
-        print("-" * (len(filename) + 21) + "\n")
+                            # Only draw boxes if we are saving the image
+                            if save_visualized:
+                                geometry = word.geometry
+                                # Convert normalized coordinates to pixel coordinates
+                                x1 = int(geometry[0][0] * width)
+                                y1 = int(geometry[0][1] * height)
+                                x2 = int(geometry[1][0] * width)
+                                y2 = int(geometry[1][1] * height)
 
-        # --- 5. Save the visualized image ---
-        if save_visualized:
-            output_path = os.path.join(output_dir, f"boxed_{filename}")
-            cv2.imwrite(output_path, image)
-            print(f"Saved visualization to: {output_path}")
-            print("------------------------------------------\n")
+                                # Draw rectangle on image
+                                cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                                # Add text label
+                                label = f"{word.value} ({word.confidence:.2f})"
+                                cv2.putText(
+                                    image,
+                                    label,
+                                    (x1, y1 - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.5,
+                                    (0, 0, 255),
+                                    1,
+                                )
+
+            f.write("-" * (len(filename) + 21) + "\n")
+            f.write(f"DocTR processing for {filename} complete.\n")
+
+            # --- 5. Save the visualized image ---
+            if save_visualized:
+                output_path = os.path.join(output_dir, f"boxed_{filename}")
+                cv2.imwrite(output_path, image)
+                f.write(f"Saved visualization to: {output_path}\n")
+                f.write("------------------------------------------\n")
 
     except Exception as e:
-        print(f"An error occurred while processing {filename}: {e}\n")
+        f.write(f"An error occurred while processing {filename}: {e}\n")
 
 
 # --- THIS IS THE MODIFIED SECTION ---
 if __name__ == "__main__":
-    
+
     # 1. Call the function to let the user choose a folder
     images_to_test = get_images_from_folder()
-    
+
     # 2. Run the tests ONLY on the list of images it returned
     if images_to_test:
         print("\nStarting DocTR process...\n")
-        
+
         # Define the output directory (e.g., a folder named "output"
         # right next to your script)
         output_dir = os.path.join(SCRIPT_DIR, "output")
-        
+
         for image_path in images_to_test:
             # Call the function with the save parameters
-            ocr_with_doctr(
-                image_path,
-                save_visualized=True,
-                output_dir=output_dir
-            )
-            
+            start = time.time()
+            ocr_with_doctr(image_path, save_visualized=True, output_dir=output_dir)
+            end = time.time()
+            with open(SCRIPT_DIR + "/output.txt", "a") as f:
+                f.write(
+                    f"Time taken for {os.path.basename(image_path)}: {end - start:.2f} seconds\n"
+                )
+
         print("--- All tests complete! ---")
     else:
         print("No images were found or selected.")
