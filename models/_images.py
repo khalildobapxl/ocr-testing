@@ -1,7 +1,11 @@
 good_quality_images = [
-    "../testImages/good1.jpg",
+    "../testImages/dutch.png",
+    "../testImages/chineese.png",
+    "../testImages/good1.jpg"
     "../testImages/good2.jpg",
     "../testImages/good3.jpg",
+    "../testImages/Crazy.jpg",
+    "../testImages/multi_languages.png"
 ]
 
 mid_quality_images = [
