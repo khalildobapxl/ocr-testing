@@ -15,5 +15,14 @@ bad_quality_images = [
     "../testImages/bad2.jpg",
     "../testImages/bad3.png",
 ]
+mixed_quality_images = [
+    "../testImages/IMG20250210140837.jpg",
+    "../testImages/IMG20250210140926.jpg",
+    "../testImages/IMG20250210140956.jpg",
+    "../testImages/IMG20250210141132.jpg",
+    "../testImages/IMG20250210141144.jpg",
+]
 
-all_images = good_quality_images + mid_quality_images + bad_quality_images
+all_images = (
+    good_quality_images + mid_quality_images + bad_quality_images + mixed_quality_images
+)
